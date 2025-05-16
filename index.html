@@ -608,15 +608,69 @@
                    alert("Attenzione: questo silos è pieno (7000 kg). Selezionare un altro silos.");
                }
            });
-           
-           // Aggiornamento campo silos selezionati
-           function updateSelectedSilos() {
-               let selected = [];
-               $(".silos.selected").each(function() {
-                   selected.push($(this).data("silos"));
-               });
-               $("#silos-selezionati").val(selected.join(", "));
-           }
+           // Correzione della gestione selezione silos
+$(document).ready(function() {
+    // Gestione selezione silos - Versione corretta
+    $(".silos").click(function() {
+        // Verifica se il silos è già pieno prima di permettere la selezione
+        if ($(this).hasClass("full")) {
+            alert("Attenzione: questo silos è pieno (7000 kg). Selezionare un altro silos.");
+            return;
+        }
+        
+        // Altrimenti, permetti la selezione e aggiorna l'interfaccia
+        $(this).toggleClass("selected");
+        updateSelectedSilos();
+    });
+    
+    // Funzione di aggiornamento campo silos selezionati
+    function updateSelectedSilos() {
+        let selected = [];
+        $(".silos.selected").each(function() {
+            selected.push($(this).data("silos"));
+        });
+        $("#silos-selezionati").val(selected.join(", "));
+        
+        // Opzionale: Valida la distribuzione del peso se il peso è già inserito
+        if ($("#peso-netto").val()) {
+            validateWeightDistribution();
+        }
+    }
+    
+    // Funzione di validazione peso-silos
+    function validateWeightDistribution() {
+        let pesoNetto = parseFloat($("#peso-netto").val());
+        let silosSelezionati = $("#silos-selezionati").val();
+        
+        if (isNaN(pesoNetto) || !silosSelezionati) {
+            return;
+        }
+        
+        let silosArray = silosSelezionati.split(", ");
+        if (silosArray.length === 0) {
+            return;
+        }
+        
+        let pesoPerSilos = pesoNetto / silosArray.length;
+        let avviso = "";
+        
+        silosArray.forEach(silosId => {
+            let currentCapacity = 0;
+            
+            if (silosData[silosId]) {
+                currentCapacity = silosData[silosId].quantita;
+            }
+            
+            if (currentCapacity + pesoPerSilos > 7000) {
+                avviso += `Il silos ${silosId} supererebbe la capacità massima (${Math.round(currentCapacity + pesoPerSilos)}/7000 kg).\n`;
+            }
+        });
+        
+        if (avviso) {
+            alert("Attenzione:\n" + avviso + "Selezionare più silos o ridurre il carico.");
+        }
+    }
+});        
            
            // Filtro varietà in base al tipo di agrume
            $("#tipo-agrume").change(function() {
