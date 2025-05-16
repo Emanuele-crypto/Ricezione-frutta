@@ -1446,5 +1446,31 @@ $(document).ready(function() {
            }
        });
    </script>
+    <script>
+  // Fix immediato per il problema di selezione dei silos
+  $(document).ready(function() {
+    // Rimuovere tutti gli event handlers esistenti dai silos
+    $(".silos").off("click");
+    
+    // Aggiungere il nuovo event handler corretto
+    $(".silos").click(function() {
+      // Verifica se il silos è pieno prima di permettere la selezione
+      if ($(this).hasClass("full")) {
+        alert("Attenzione: questo silos è pieno (7000 kg). Selezionare un altro silos.");
+        return;
+      }
+      
+      // Toggle della classe selected e aggiornamento
+      $(this).toggleClass("selected");
+      
+      // Aggiornamento campo silos selezionati
+      let selected = [];
+      $(".silos.selected").each(function() {
+        selected.push($(this).data("silos"));
+      });
+      $("#silos-selezionati").val(selected.join(", "));
+    });
+  });
+</script>
 </body>
 </html>
